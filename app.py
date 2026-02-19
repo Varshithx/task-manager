@@ -296,8 +296,7 @@ def api_toggle_task(task_id):
         db.session.rollback()
         print(f"Toggle task error: {e}")
         return jsonify({'message': 'Server error.', 'success': False}), 500
-
-
+        
 # ── ADMIN: View all data (REMOVE LATER) ──
 @app.route('/api/admin/data')
 def admin_data():
@@ -305,7 +304,7 @@ def admin_data():
     tasks = Task.query.all()
     return jsonify({
         'users': [{'id': u.id, 'username': u.username, 'email': u.email} for u in users],
-        'tasks': [{'id': t.id, 'title': t.title, 'done': t.done, 'user_id': t.user_id} for t in tasks]
+        'tasks': [{'id': t.id, 'title': t.title, 'content': t.content, 'done': t.done, 'user_id': t.user_id} for t in tasks]
     })
 
 # ============================================================
