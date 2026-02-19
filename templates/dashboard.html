@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* ── RESET & BASE ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            line-height: 1.6;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: #16213e;
+            color: #fff;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            color: #e94560;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .nav-links a {
+            color: #a8b2d1;
+            text-decoration: none;
+            margin-left: 1.2rem;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .nav-links a:hover { color: #fff; }
+        .nav-user { color: #64ffda; margin-right: 0.5rem; }
+
+        /* ── CONTAINER ── */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* ── ALERTS ── */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* ── TAB BUTTONS ── */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #777;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #16213e; }
+        .tab-btn.active {
+            color: #e94560;
+            border-bottom-color: #e94560;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── FORMS ── */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { outline: none; border-color: #e94560; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.4rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: #fff;
+        }
+        .btn-primary { background: #e94560; }
+        .btn-primary:hover { background: #c73652; }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.85rem; }
+        .btn-edit { background: #0f3460; }
+        .btn-edit:hover { background: #16213e; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #bd2130; }
+
+        /* ── CARDS ── */
+        .card {
+            background: #fff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1rem;
+        }
+        .create-card h3 { margin-bottom: 0.8rem; color: #16213e; }
+
+        /* ── TASK LIST ── */
+        .task-list { margin-top: 1.5rem; }
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .task-info { flex: 1; }
+        .task-title { font-size: 1.05rem; }
+        .task-content { color: #555; font-size: 0.9rem; margin-top: 0.2rem; }
+        .task-date { color: #999; font-size: 0.8rem; }
+        .task-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+        .task-done { opacity: 0.6; }
+        .task-done .task-title { text-decoration: line-through; }
+        .toggle-form { padding-top: 0.15rem; }
+        .empty-state { text-align: center; color: #999; margin-top: 2rem; font-size: 1.1rem; }
+        h2 { margin-bottom: 1rem; color: #16213e; }
+
+        /* ── CALENDAR STYLES ── */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .calendar-header h3 { font-size: 1.3rem; color: #16213e; }
+        .calendar-nav { display: flex; gap: 0.5rem; }
+        .calendar-nav button {
+            padding: 0.4rem 1rem;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #16213e;
+            transition: all 0.2s;
+        }
+        .calendar-nav button:hover {
+            background: #e94560;
+            color: #fff;
+            border-color: #e94560;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .calendar-day-name {
+            background: #16213e;
+            color: #fff;
+            text-align: center;
+            padding: 0.6rem 0;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .calendar-day {
+            background: #fff;
+            min-height: 90px;
+            padding: 0.4rem;
+            position: relative;
+            vertical-align: top;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .calendar-day:hover { background: #f8f8ff; }
+        .calendar-day.empty { background: #f8f8f8; cursor: default; }
+        .calendar-day.empty:hover { background: #f8f8f8; }
+        .calendar-day.today { background: #fff3e0; }
+
+        .day-number {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+        .calendar-day.today .day-number {
+            background: #e94560;
+            color: #fff;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+        }
+
+        .cal-task {
+            font-size: 0.7rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        .cal-task.cal-pending { background: #e0e7ff; color: #3730a3; }
+        .cal-task.cal-done { background: #d4edda; color: #155724; text-decoration: line-through; }
+        .cal-task-more { font-size: 0.7rem; color: #e94560; font-weight: 600; cursor: pointer; }
+
+        .day-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .day-popup h3 { margin-bottom: 1rem; color: #16213e; }
+        .day-popup-task {
+            padding: 0.6rem;
+            border-left: 3px solid #e94560;
+            margin-bottom: 0.6rem;
+            background: #f9f9f9;
+            border-radius: 0 6px 6px 0;
+        }
+        .day-popup-task.popup-done { border-left-color: #28a745; opacity: 0.6; }
+        .day-popup-task strong { font-size: 0.95rem; }
+        .day-popup-task p { font-size: 0.85rem; color: #555; margin-top: 0.2rem; }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+        }
+        .popup-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .popup-close:hover { color: #e94560; }
+        .popup-empty { color: #999; text-align: center; padding: 1rem; }
+    </style>
+</head>
+<body>
+
+    <!-- ── NAVIGATION BAR ── -->
+    <nav class="navbar">
+        <a href="/dashboard" class="nav-brand">Task Manager</a>
+        <div class="nav-links">
+            <span class="nav-user" id="navUser">Hello, User</span>
+            <a href="/dashboard">Dashboard</a>
+            <a id="logoutBtn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="alert" id="alertBox"></div>
+
+        <!-- ── TAB BUTTONS ── -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('tasks')">📋 My Tasks</button>
+            <button class="tab-btn" onclick="switchTab('calendar')">📅 Calendar</button>
+        </div>
+
+        <!-- ── TAB 1: TASKS ── -->
+        <div class="tab-content active" id="tab-tasks">
+            <h2>My Tasks</h2>
+
+            <div class="card create-card">
+                <h3>Add a New Task</h3>
+                <form id="createTaskForm">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title"
+                               placeholder="What do you need to do?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Details (optional)</label>
+                        <textarea id="content" name="content" rows="2"
+                                  placeholder="Any extra notes..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </form>
+            </div>
+
+            <div class="task-list" id="taskList"></div>
+        </div>
+
+        <!-- ── TAB 2: CALENDAR ── -->
+        <div class="tab-content" id="tab-calendar">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)">◀</button>
+                </div>
+                <h3 id="calendarTitle">Month Year</h3>
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(1)">▶</button>
+                    <button onclick="goToToday()">Today</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </div>
+
+    <!-- ── DAY DETAIL POPUP ── -->
+    <div class="popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+    <div class="day-popup" id="dayPopup">
+        <button class="popup-close" onclick="closePopup()">✕</button>
+        <h3 id="popupTitle">Tasks for Jan 1</h3>
+        <div id="popupContent"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  STORE TASKS IN MEMORY (fetched from server)
+        // ============================================================
+        let cachedTasks = [];
+
+
+        // ============================================================
+        //  AUTH CHECK — ask the server who is logged in
+        // ============================================================
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/me');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('navUser').textContent = 'Hello, ' + data.user.username;
+                } else {
+                    // Not logged in — redirect to login page
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                window.location.href = '/login';
+            }
+        }
+        checkAuth();
+
+
+        // ── LOGOUT — tell server to end session ──
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (error) {
+                // Even if request fails, redirect to login
+            }
+            window.location.href = '/login';
+        });
+
+
+        // ============================================================
+        //  TAB SWITCHING
+        // ============================================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'calendar') {
+                renderCalendar();
+            }
+        }
+
+
+        // ============================================================
+        //  HELPERS
+        // ============================================================
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+        }
+
+
+        // ============================================================
+        //  FETCH TASKS FROM SERVER
+        // ============================================================
+        async function fetchTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+
+                if (data.success) {
+                    cachedTasks = data.tasks;
+                } else {
+                    cachedTasks = [];
+                }
+            } catch (error) {
+                showAlert('Could not load tasks.', 'error');
+                cachedTasks = [];
+            }
+        }
+
+
+        // ============================================================
+        //  CREATE TASK — send to server
+        // ============================================================
+        document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const title   = document.getElementById('title').value.trim();
+            const content = document.getElementById('content').value.trim();
+
+            if (!title) {
+                showAlert('Task title cannot be empty.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('title').value = '';
+                    document.getElementById('content').value = '';
+                    showAlert('Task created!', 'success');
+                    await fetchTasks();
+                    renderTasks();
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Could not create task.', 'error');
+            }
+        });
+
+
+        // ============================================================
+        //  RENDER TASK LIST (from cached data)
+        // ============================================================
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+
+            if (cachedTasks.length === 0) {
+                taskList.innerHTML = '<p class="empty-state">No tasks yet. Add one above!</p>';
+                return;
+            }
+
+            // Sort newest first
+            const tasks = [...cachedTasks].sort((a, b) =>
+                new Date(b.created_at) - new Date(a.created_at)
+            );
+
+            let html = '';
+            tasks.forEach(task => {
+                const doneClass = task.done ? 'task-done' : '';
+                const checked   = task.done ? 'checked' : '';
+                const date = new Date(task.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                html += `
+                <div class="card task-card ${doneClass}" id="task-${task.id}">
+                    <div class="task-display" id="display-${task.id}">
+                        <div class="task-header">
+                            <div class="toggle-form">
+                                <input type="checkbox" ${checked}
+                                       onchange="toggleTask(${task.id})">
+                            </div>
+                            <div class="task-info">
+                                <strong class="task-title">${escapeHtml(task.title)}</strong>
+                                ${task.content ? '<p class="task-content">' + escapeHtml(task.content) + '</p>' : ''}
+                                <small class="task-date">${date}</small>
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn btn-small btn-edit"
+                                        onclick="toggleEdit(${task.id})">Edit</button>
+                                <button class="btn btn-small btn-danger"
+                                        onclick="deleteTask(${task.id})">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-edit" id="edit-${task.id}" style="display: none;">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="editTitle-${task.id}"
+                                   value="${escapeHtml(task.title)}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Details</label>
+                            <textarea id="editContent-${task.id}" rows="2">${escapeHtml(task.content || '')}</textarea>
+                        </div>
+                        <button class="btn btn-primary btn-small"
+                                onclick="updateTask(${task.id})">Save</button>
+                        <button class="btn btn-small"
+                                onclick="toggleEdit(${task.id})">Cancel</button>
+                    </div>
+                </div>`;
+            });
+
+            taskList.innerHTML = html;
+        }
+
+
+        // ============================================================
+        //  UPDATE TASK — send to server
+        // ============================================================
+        async function updateTask(taskId) {
+            const newTitle   = document.getElementById('editTitle-' + taskId).value.trim();
+            const newContent = document.getElementById('editContent-' + taskId).value.trim();
+
+            if (!newTitle) {
+                showAlert('Task title cannot be empty.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/tasks/' + taskId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle, content: newContent })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Task updated!', 'success');
+                    await fetchTasks();
+                    renderTasks();
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Could not update task.', 'error');
+            }
+        }
+
+
+        // ============================================================
+        //  DELETE TASK — send to server
+        // ============================================================
+        async function deleteTask(taskId) {
+            if (!confirm('Delete this task?')) return;
+
+            try {
+                const response = await fetch('/api/tasks/' + taskId, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Task deleted.', 'success');
+                    await fetchTasks();
+                    renderTasks();
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Could not delete task.', 'error');
+            }
+        }
+
+
+        // ============================================================
+        //  TOGGLE TASK — send to server
+        // ============================================================
+        async function toggleTask(taskId) {
+            try {
+                const response = await fetch('/api/tasks/' + taskId + '/toggle', {
+                    method: 'PUT'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await fetchTasks();
+                    renderTasks();
+                }
+            } catch (error) {
+                showAlert('Could not update task.', 'error');
+            }
+        }
+
+
+        // ============================================================
+        //  TOGGLE EDIT VIEW
+        // ============================================================
+        function toggleEdit(taskId) {
+            const display = document.getElementById('display-' + taskId);
+            const edit    = document.getElementById('edit-' + taskId);
+            if (edit.style.display === 'none') {
+                edit.style.display = 'block';
+                display.style.display = 'none';
+            } else {
+                edit.style.display = 'none';
+                display.style.display = 'block';
+            }
+        }
+
+
+        // ============================================================
+        //  CALENDAR LOGIC
+        // ============================================================
+        let calendarYear  = new Date().getFullYear();
+        let calendarMonth = new Date().getMonth();
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        function changeMonth(direction) {
+            calendarMonth += direction;
+            if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+            else if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            calendarYear  = new Date().getFullYear();
+            calendarMonth = new Date().getMonth();
+            renderCalendar();
+        }
+
+        // Group cached tasks by date string
+        function getTasksByDate() {
+            const map = {};
+            cachedTasks.forEach(task => {
+                const dateKey = new Date(task.created_at).toISOString().split('T')[0];
+                if (!map[dateKey]) { map[dateKey] = []; }
+                map[dateKey].push(task);
+            });
+            return map;
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarTitle');
+
+            title.textContent = monthNames[calendarMonth] + ' ' + calendarYear;
+
+            const tasksByDate = getTasksByDate();
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+
+            let html = '';
+
+            dayNames.forEach(day => {
+                html += `<div class="calendar-day-name">${day}</div>`;
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="calendar-day empty"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const mm = String(calendarMonth + 1).padStart(2, '0');
+                const dd = String(day).padStart(2, '0');
+                const dateStr = `${calendarYear}-${mm}-${dd}`;
+
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+                const dayTasks = tasksByDate[dateStr] || [];
+
+                html += `<div class="calendar-day ${isToday}" onclick="openDayPopup('${dateStr}')">`;
+                html += `<div class="day-number">${day}</div>`;
+
+                const maxShow = 2;
+                dayTasks.slice(0, maxShow).forEach(task => {
+                    const cls = task.done ? 'cal-done' : 'cal-pending';
+                    html += `<div class="cal-task ${cls}">${escapeHtml(task.title)}</div>`;
+                });
+
+                if (dayTasks.length > maxShow) {
+                    html += `<div class="cal-task-more">+${dayTasks.length - maxShow} more</div>`;
+                }
+
+                html += `</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function openDayPopup(dateStr) {
+            const tasksByDate = getTasksByDate();
+            const dayTasks = tasksByDate[dateStr] || [];
+
+            const dateObj = new Date(dateStr + 'T12:00:00');
+            const formatted = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            document.getElementById('popupTitle').textContent = formatted;
+
+            let html = '';
+            if (dayTasks.length === 0) {
+                html = '<p class="popup-empty">No tasks on this day.</p>';
+            } else {
+                dayTasks.forEach(task => {
+                    const doneClass = task.done ? 'popup-done' : '';
+                    const status = task.done ? '✓ Done' : '○ Pending';
+                    const time = new Date(task.created_at).toLocaleTimeString('en-US', {
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    html += `
+                    <div class="day-popup-task ${doneClass}">
+                        <strong>${escapeHtml(task.title)}</strong>
+                        <span style="float:right; font-size:0.8rem; color:#999">${time}</span>
+                        ${task.content ? '<p>' + escapeHtml(task.content) + '</p>' : ''}
+                        <small style="color: ${task.done ? '#28a745' : '#e94560'}">${status}</small>
+                    </div>`;
+                });
+            }
+
+            document.getElementById('popupContent').innerHTML = html;
+            document.getElementById('popupOverlay').style.display = 'block';
+            document.getElementById('dayPopup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById('dayPopup').style.display = 'none';
+        }
+
+
+        // ============================================================
+        //  INITIAL LOAD — fetch tasks from server then render
+        // ============================================================
+        async function init() {
+            await fetchTasks();
+            renderTasks();
+            renderCalendar();
+        }
+        init();
+    </script>
+
+</body>
+</html>
