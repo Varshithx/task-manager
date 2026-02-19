@@ -297,16 +297,35 @@ def api_toggle_task(task_id):
         print(f"Toggle task error: {e}")
         return jsonify({'message': 'Server error.', 'success': False}), 500
         
+# # ── ADMIN: View all data (REMOVE LATER) ──
+# @app.route('/api/admin/data')
+# def admin_data():
+#     users = User.query.all()
+#     tasks = Task.query.all()
+#     return jsonify({
+#         'users': [{'id': u.id, 'username': u.username, 'email': u.email} for u in users], 
+#         'tasks': [{'id': t.id, 'title': t.title, 'content': t.content, 'done': t.done, 'user_id': t.user_id} for t in tasks]
+#     })
+
+
+
+
 # ── ADMIN: View all data (REMOVE LATER) ──
 @app.route('/api/admin/data')
 def admin_data():
     users = User.query.all()
     tasks = Task.query.all()
-    return jsonify({
+    
+    data = {
         'users': [{'id': u.id, 'username': u.username, 'email': u.email} for u in users],
         'tasks': [{'id': t.id, 'title': t.title, 'content': t.content, 'done': t.done, 'user_id': t.user_id} for t in tasks]
-    })
-
+    }
+    
+    response = app.response_class(
+        response=__import__('json').dumps(data, indent=4),
+        mimetype='application/json'
+    )
+    return response
 # ============================================================
 #  CREATE TABLES & RUN
 # ============================================================
